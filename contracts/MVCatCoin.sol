@@ -12,14 +12,7 @@ import {Nonces} from "@openzeppelin/contracts/utils/Nonces.sol";
 /// @title MVCatCoin
 /// @notice ERC20 governance and utility token with capped supply, permit, and on-chain voting.
 /// @dev OpenZeppelin Contracts v5.3.0. Roles: DEFAULT_ADMIN_ROLE, MINTER_ROLE.
-contract MVCatCoin is
-    ERC20,
-    ERC20Burnable,
-    ERC20Capped,
-    ERC20Permit,
-    ERC20Votes,
-    AccessControl
-{
+contract MVCatCoin is ERC20, ERC20Burnable, ERC20Capped, ERC20Permit, ERC20Votes, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     uint256 public constant MAX_SUPPLY = 1_000_000_000e18;
@@ -45,19 +38,11 @@ contract MVCatCoin is
         _mint(to, amount);
     }
 
-    function _update(address from, address to, uint256 value)
-        internal
-        override(ERC20, ERC20Capped, ERC20Votes)
-    {
+    function _update(address from, address to, uint256 value) internal override(ERC20, ERC20Capped, ERC20Votes) {
         super._update(from, to, value);
     }
 
-    function nonces(address owner)
-        public
-        view
-        override(ERC20Permit, Nonces)
-        returns (uint256)
-    {
+    function nonces(address owner) public view override(ERC20Permit, Nonces) returns (uint256) {
         return super.nonces(owner);
     }
 }

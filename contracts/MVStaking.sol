@@ -34,9 +34,7 @@ contract MVStaking is Ownable2Step, ReentrancyGuard {
     error InsufficientStake();
     error ProtectedToken();
 
-    constructor(address stakingToken_, address rewardsToken_, address initialOwner)
-        Ownable(initialOwner)
-    {
+    constructor(address stakingToken_, address rewardsToken_, address initialOwner) Ownable(initialOwner) {
         if (stakingToken_ == address(0) || rewardsToken_ == address(0)) revert ZeroAddress();
         stakingToken = IERC20(stakingToken_);
         rewardsToken = IERC20(rewardsToken_);
@@ -55,13 +53,11 @@ contract MVStaking is Ownable2Step, ReentrancyGuard {
 
     function rewardPerToken() public view returns (uint256) {
         if (totalStaked == 0) return rewardPerTokenStored;
-        return rewardPerTokenStored
-            + ((block.timestamp - lastUpdate) * rewardRate * 1e18) / totalStaked;
+        return rewardPerTokenStored + ((block.timestamp - lastUpdate) * rewardRate * 1e18) / totalStaked;
     }
 
     function earned(address account) public view returns (uint256) {
-        return (staked[account] * (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18
-            + rewards[account];
+        return (staked[account] * (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18 + rewards[account];
     }
 
     function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {

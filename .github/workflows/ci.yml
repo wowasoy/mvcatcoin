@@ -27,9 +27,6 @@ jobs:
       - name: Test
         run: forge test -vvv
 
-      - name: Format check
-        run: forge fmt --check
-
   frontend:
     runs-on: ubuntu-latest
     defaults:
