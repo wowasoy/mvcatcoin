@@ -6,6 +6,8 @@
 [![Foundry](https://img.shields.io/badge/Foundry-1.5.0-black.svg)](https://getfoundry.sh/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6.svg)](https://www.typescriptlang.org/)
 
+**Live on Cloudflare:** https://mvcatcoin.pages.dev
+
 MVCatCoin is a production-grade ERC20 token with on-chain governance and a companion staking pool, plus a TypeScript dApp dashboard with liquid glass UI.
 
 ## Tech Stack 2026
@@ -81,6 +83,8 @@ TypeScript dApp dashboard with liquid glass UI, black-green theme, and MV logo. 
 5. Click Save and Deploy.
 
 Cloudflare provisions SSL automatically and serves via edge network with DDoS protection.
+
+Live site: https://mvcatcoin.pages.dev
 
 ## Testing
 
