@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#001a0f">
+  <meta name="description" content="MVCatCoin - ERC20 governance token and staking pool">
+  <title>MVCatCoin</title>
+  <link rel="icon" type="image/png" href="/assets/cat-logo.png">
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <main>
+    <header class="hero glass">
+      <img src="/assets/cat-logo.png" alt="MVCatCoin" class="logo" width="96" height="96">
+      <h1>MVCatCoin</h1>
+      <p class="subtitle">ERC20 Governance Token &amp; Staking Pool</p>
+      <p class="tag">MVCAT &middot; DeFi 2026</p>
+    </header>
+
+    <section class="card glass">
+      <h2>Wallet</h2>
+      <button id="connect" class="btn-primary">Connect Wallet</button>
+      <p id="account" class="mono">Not connected</p>
+    </section>
+
+    <section class="card glass">
+      <h2>Token Info</h2>
+      <label for="tokenAddress">Contract Address</label>
+      <input id="tokenAddress" type="text" placeholder="0x..." autocomplete="off" spellcheck="false">
+      <button id="loadInfo" class="btn-primary">Load Info</button>
+      <div id="tokenInfo" class="mono"></div>
+    </section>
+
+    <section class="card glass">
+      <h2>Staking</h2>
+      <label for="stakingAddress">Staking Contract</label>
+      <input id="stakingAddress" type="text" placeholder="0x..." autocomplete="off" spellcheck="false">
+      <label for="stakeAmount">Amount (wei)</label>
+      <input id="stakeAmount" type="text" placeholder="1000000000000000000" autocomplete="off" spellcheck="false">
+      <div class="row">
+        <button id="stake" class="btn-primary">Stake</button>
+        <button id="withdraw" class="btn-ghost">Withdraw</button>
+        <button id="claim" class="btn-ghost">Claim</button>
+      </div>
+      <p id="stakingStatus" class="mono"></p>
+    </section>
+
+    <footer class="glass">
+      <p class="mono">MIT &middot; MVCatCoin &middot; 2026</p>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
