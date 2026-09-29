@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { parseUnits } from "viem";
 import {
   useAccount,
-  useWriteContract,
   useWaitForTransactionReceipt,
+  useWriteContract,
 } from "wagmi";
 import { toast } from "sonner";
 import { stakingAbi } from "../abi";
@@ -12,27 +12,41 @@ import { DEPLOYMENTS, isConfigured } from "../contracts";
 type Fn = "stake" | "withdraw" | "claimReward";
 
 export default function StakingCard() {
-  const { account, chain } = useAccount();
+  const { address: account, chain } = useAccount();
   const deployment = chain ? DEPLOYMENTS[chain.id] : undefined;
   const [amount, setAmount] = useState("");
 
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
-  if (error) toast.error(error.message.split("\n")[0]);
-  if (isSuccess) toast.success("Transaction confirmed");
+  useEffect(() => {
+    if (writeError) {
+      toast.error(writeError.message.split("\n")[0] ?? "Transaction failed");
+    }
+  }, [writeError]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Transaction confirmed");
+    }
+  }, [isSuccess]);
 
   if (!deployment || !isConfigured(deployment)) {
     return (
       <section className="card glass">
         <h2>Staking</h2>
-        <p className="mono">Staking contract not deployed.</p>
+        <p className="mono">
+          Staking contract not deployed. Configure deployment first.
+        </p>
       </section>
     );
   }
 
   const call = (fn: Fn) => {
-    if (!account) return toast.error("Connect wallet first");
+    if (!account) {
+      toast.error("Connect wallet first");
+      return;
+    }
 
     if (fn === "claimReward") {
       writeContract({
@@ -47,9 +61,14 @@ export default function StakingCard() {
     try {
       parsed = parseUnits(amount, 18);
     } catch {
-      return toast.error("Invalid amount");
+      toast.error("Invalid amount");
+      return;
     }
-    if (parsed === 0n) return toast.error("Enter an amount");
+
+    if (parsed === 0n) {
+      toast.error("Enter an amount");
+      return;
+    }
 
     writeContract({
       address: deployment.stakingAddress,
@@ -77,13 +96,25 @@ export default function StakingCard() {
       />
 
       <div className="row">
-        <button className="btn-primary" onClick={() => call("stake")} disabled={busy}>
+        <button
+          className="btn-primary"
+          onClick={() => call("stake")}
+          disabled={busy}
+        >
           {busy ? "Pending..." : "Stake"}
         </button>
-        <button className="btn-ghost" onClick={() => call("withdraw")} disabled={busy}>
+        <button
+          className="btn-ghost"
+          onClick={() => call("withdraw")}
+          disabled={busy}
+        >
           Withdraw
         </button>
-        <button className="btn-ghost" onClick={() => call("claimReward")} disabled={busy}>
+        <button
+          className="btn-ghost"
+          onClick={() => call("claimReward")}
+          disabled={busy}
+        >
           Claim
         </button>
       </div>

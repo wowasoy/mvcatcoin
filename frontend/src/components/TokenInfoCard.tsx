@@ -1,49 +1,76 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatUnits, isAddress, type Address } from "viem";
-import { useAccount, useReadContracts } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { toast } from "sonner";
 import { erc20Abi } from "../abi";
-import { DEPLOYMENTS } from "../contracts";
-import { sepolia } from "wagmi/chains";
+import { DEPLOYMENTS, ZERO_ADDRESS } from "../contracts";
 
 export default function TokenInfoCard() {
   const { address: account, chain } = useAccount();
   const deployment = chain ? DEPLOYMENTS[chain.id] : undefined;
-  const [input, setInput] = useState<string>(
-    deployment?.tokenAddress !== "0x0000000000000000000000000000000000000000"
-      ? deployment?.tokenAddress ?? ""
-      : "",
-  );
 
-  const tokenAddress = isAddress(input) ? (input as Address) : undefined;
+  const preset =
+    deployment && deployment.tokenAddress !== ZERO_ADDRESS
+      ? deployment.tokenAddress
+      : "";
 
-  const { data, isLoading, isError, error } = useReadContracts({
-    contracts: tokenAddress
-      ? [
-          { address: tokenAddress, abi: erc20Abi, functionName: "name" },
-          { address: tokenAddress, abi: erc20Abi, functionName: "symbol" },
-          { address: tokenAddress, abi: erc20Abi, functionName: "decimals" },
-          { address: tokenAddress, abi: erc20Abi, functionName: "totalSupply" },
-          ...(account
-            ? [
-                {
-                  address: tokenAddress,
-                  abi: erc20Abi,
-                  functionName: "balanceOf" as const,
-                  args: [account] as const,
-                },
-              ]
-            : []),
-        ]
-      : [],
-    query: { enabled: !!tokenAddress },
+  const [input, setInput] = useState<string>(preset);
+
+  useEffect(() => {
+    if (preset) setInput(preset);
+  }, [preset]);
+
+  const tokenAddress: Address = isAddress(input) ? (input as Address) : ZERO_ADDRESS;
+  const enabled = isAddress(input);
+
+  const name = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "name",
+    query: { enabled },
   });
 
-  if (isError) {
-    toast.error(error?.message.split("\n")[0] ?? "Failed to load token info");
-  }
+  const symbol = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "symbol",
+    query: { enabled },
+  });
 
-  const [name, symbol, decimals, supply, balance] = data ?? [];
+  const decimals = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "decimals",
+    query: { enabled },
+  });
+
+  const supply = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "totalSupply",
+    query: { enabled },
+  });
+
+  const balance = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: account ? [account] : undefined,
+    query: { enabled: enabled && account !== undefined },
+  });
+
+  const firstError =
+    name.error ?? symbol.error ?? decimals.error ?? supply.error ?? balance.error;
+
+  useEffect(() => {
+    if (firstError) {
+      toast.error(firstError.message.split("\n")[0] ?? "Failed to load token info");
+    }
+  }, [firstError]);
+
+  const decimalsValue = decimals.data ?? 18;
+  const isLoading =
+    name.isLoading || symbol.isLoading || decimals.isLoading || supply.isLoading;
 
   return (
     <section className="card glass">
@@ -62,23 +89,29 @@ export default function TokenInfoCard() {
 
       {isLoading && <p className="mono">Loading...</p>}
 
-      {data && decimals?.result !== undefined && (
+      {decimals.data !== undefined && (
         <div className="mono token-info">
-          <p>Name: <span>{name?.result as string}</span></p>
-          <p>Symbol: <span>{symbol?.result as string}</span></p>
-          <p>Decimals: <span>{decimals.result as number}</span></p>
+          <p>
+            Name: <span>{name.data ?? "-"}</span>
+          </p>
+          <p>
+            Symbol: <span>{symbol.data ?? "-"}</span>
+          </p>
+          <p>
+            Decimals: <span>{decimals.data}</span>
+          </p>
           <p>
             Total Supply:{" "}
             <span>
-              {formatUnits(supply?.result as bigint ?? 0n, decimals.result as number)}
+              {supply.data !== undefined
+                ? formatUnits(supply.data, decimalsValue)
+                : "-"}
             </span>
           </p>
-          {balance?.result !== undefined && (
+          {balance.data !== undefined && (
             <p>
               Your Balance:{" "}
-              <span>
-                {formatUnits(balance.result as bigint, decimals.result as number)}
-              </span>
+              <span>{formatUnits(balance.data, decimalsValue)}</span>
             </p>
           )}
         </div>

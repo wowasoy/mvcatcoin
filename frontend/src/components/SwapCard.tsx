@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { parseUnits, type Address } from "viem";
 import {
   useAccount,
-  useReadContract,
-  useWriteContract,
   useWaitForTransactionReceipt,
+  useWriteContract,
 } from "wagmi";
 import { toast } from "sonner";
 import { erc20Abi, routerAbi } from "../abi";
-import { DEPLOYMENTS, isConfigured, ZERO_ADDRESS } from "../contracts";
+import { DEPLOYMENTS, isConfigured } from "../contracts";
 
 type Direction = "eth-to-token" | "token-to-eth";
 
@@ -20,27 +19,47 @@ export default function SwapCard() {
   const { writeContract, data: hash, isPending, error: writeError } = useWriteContract();
   const { isLoading: confirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
-  if (writeError) toast.error(writeError.message.split("\n")[0]);
-  if (isSuccess) toast.success("Swap confirmed");
+  useEffect(() => {
+    if (writeError) {
+      toast.error(writeError.message.split("\n")[0] ?? "Swap failed");
+    }
+  }, [writeError]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Swap confirmed");
+    }
+  }, [isSuccess]);
 
   if (!deployment || !isConfigured(deployment)) {
     return (
       <section className="card glass">
         <h2>Swap</h2>
-        <p className="mono">Contract not configured for this network.</p>
+        <p className="mono">
+          Contract not configured for this network. Deploy token first.
+        </p>
       </section>
     );
   }
 
   const handleSwap = (direction: Direction) => {
-    if (!account) return toast.error("Connect wallet first");
+    if (!account) {
+      toast.error("Connect wallet first");
+      return;
+    }
+
     let amountIn: bigint;
     try {
       amountIn = parseUnits(amount, 18);
     } catch {
-      return toast.error("Invalid amount");
+      toast.error("Invalid amount");
+      return;
     }
-    if (amountIn === 0n) return toast.error("Enter an amount");
+
+    if (amountIn === 0n) {
+      toast.error("Enter an amount");
+      return;
+    }
 
     const path: readonly Address[] =
       direction === "eth-to-token"
@@ -64,14 +83,7 @@ export default function SwapCard() {
         functionName: "approve",
         args: [deployment.routerAddress, amountIn],
       });
-      setTimeout(() => {
-        writeContract({
-          address: deployment.routerAddress,
-          abi: routerAbi,
-          functionName: "swapExactTokensForETH",
-          args: [amountIn, 0n, path, account, deadline],
-        });
-      }, 3000);
+      toast.info("Approve submitted. After confirming, run Swap again.");
     }
   };
 
@@ -98,14 +110,14 @@ export default function SwapCard() {
           onClick={() => handleSwap("eth-to-token")}
           disabled={busy}
         >
-          {busy ? "Pending..." : "Swap ETH → MVCAT"}
+          {busy ? "Pending..." : "Swap ETH \u2192 MVCAT"}
         </button>
         <button
           className="btn-ghost"
           onClick={() => handleSwap("token-to-eth")}
           disabled={busy}
         >
-          Swap MVCAT → ETH
+          Approve MVCAT
         </button>
       </div>
 
