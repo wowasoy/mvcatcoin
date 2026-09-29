@@ -63,6 +63,7 @@ main {
   max-width: 720px;
 }
 
+/* ---- Liquid glass ---- */
 .glass {
   position: relative;
   background: var(--glass-bg);
@@ -100,6 +101,7 @@ main {
   100% { left: 130%; }
 }
 
+/* ---- Hero ---- */
 .hero {
   padding: 2rem 1.5rem 1.75rem;
   text-align: center;
@@ -143,6 +145,7 @@ h1 {
   margin: 0;
 }
 
+/* ---- Cards ---- */
 .card {
   padding: 1.25rem 1.25rem 1.5rem;
   margin-bottom: 1rem;
@@ -206,13 +209,18 @@ button {
 
 button:active { transform: translateY(1px); }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #00ff88, #00d97a);
   color: #001a0f;
   box-shadow: 0 6px 20px rgba(0, 255, 136, 0.35);
 }
 
-.btn-primary:hover { box-shadow: 0 8px 28px rgba(0, 255, 136, 0.55); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 8px 28px rgba(0, 255, 136, 0.55); }
 
 .btn-ghost {
   background: rgba(0, 255, 136, 0.08);
@@ -220,7 +228,7 @@ button:active { transform: translateY(1px); }
   border-color: var(--glass-border);
 }
 
-.btn-ghost:hover { background: rgba(0, 255, 136, 0.16); }
+.btn-ghost:hover:not(:disabled) { background: rgba(0, 255, 136, 0.16); }
 
 .mono {
   font-size: 0.82rem;
@@ -230,25 +238,50 @@ button:active { transform: translateY(1px); }
   z-index: 1;
 }
 
-#tokenInfo p { margin: 0.3rem 0; }
-#tokenInfo p span { color: var(--accent); }
+/* ---- Links inside cards ---- */
+.row a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent);
+}
 
+.row a:hover {
+  border-bottom-style: solid;
+}
+
+/* ---- Token info ---- */
+.token-info p { margin: 0.3rem 0; }
+.token-info p span { color: var(--accent); }
+
+/* ---- Account ---- */
+.account {
+  margin-top: 0.75rem;
+}
+
+/* ---- Footer ---- */
 footer {
   padding: 1rem 1.25rem;
   text-align: center;
   margin-top: 0.5rem;
 }
 
-footer p { margin: 0; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; }
+footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
 
+/* ---- Responsive ---- */
 @media (max-width: 480px) {
   body { padding: 1rem 0.75rem 2rem; }
   h1 { font-size: 1.6rem; }
   .logo { width: 72px; height: 72px; }
   .row { flex-direction: column; }
-  button { width: 100%; }
+  .row button { width: 100%; }
 }
 
+/* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   .orb, .logo, .glass::after { animation: none; }
 }

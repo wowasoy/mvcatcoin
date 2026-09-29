@@ -1,0 +1,37 @@
+export default function Logo() {
+  return (
+    <svg
+      className="logo"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 256 256"
+      width="96"
+      height="96"
+      role="img"
+      aria-label="MVCatCoin logo"
+    >
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#a8ff1a" />
+          <stop offset="100%" stopColor="#7fff00" />
+        </linearGradient>
+        <linearGradient id="textGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#9a9a9a" />
+          <stop offset="100%" stopColor="#6e6e6e" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="256" height="256" rx="56" ry="56" fill="url(#bgGrad)" />
+      <text
+        x="128"
+        y="164"
+        fontFamily="Helvetica Neue, Helvetica, Arial, sans-serif"
+        fontSize="128"
+        fontWeight="300"
+        letterSpacing="-4"
+        textAnchor="middle"
+        fill="url(#textGrad)"
+      >
+        MV
+      </text>
+    </svg>
+  );
+}
