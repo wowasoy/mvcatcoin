@@ -1,104 +1,193 @@
 # MVCatCoin
 
 [![CI](https://github.com/wowasoy/mvcatcoin/actions/workflows/ci.yml/badge.svg)](https://github.com/wowasoy/mvcatcoin/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-11%20passing-brightgreen)](https://github.com/wowasoy/mvcatcoin/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.30-363636.svg)](https://soliditylang.org/)
 [![Foundry](https://img.shields.io/badge/Foundry-1.5.0-black.svg)](https://getfoundry.sh/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6.svg)](https://www.typescriptlang.org/)
 
-**Live on Cloudflare:** https://mvcatcoin.pages.dev
+**Live demo:** https://mvcatcoin.pages.dev
 
-MVCatCoin is a production-grade ERC20 token with on-chain governance and a companion staking pool, plus a TypeScript dApp dashboard with liquid glass UI.
+Production-grade ERC20 governance token with a companion staking pool and a TypeScript dApp dashboard. Built with Foundry, OpenZeppelin Contracts v5, and React + wagmi.
 
-## Tech Stack 2026
+---
 
-| Component | Version |
-|---|---|
-| Solidity | 0.8.30 |
-| Foundry | 1.5.0 |
-| OpenZeppelin Contracts | 5.3.0 |
-| TypeScript | 5.6 |
-| Vite | 5.4 |
-| Viem | 2.21 |
-| Hosting | Cloudflare Pages |
+## Overview
 
-## Contracts
+MVCatCoin is a two-contract system:
 
-### MVCatCoin
+- **MVCatCoin** — an ERC20 token with capped supply, permit, burnable, and on-chain voting
+- **MVStaking** — a time-based staking pool distributing rewards proportionally
 
-- ERC20 with capped supply of 1,000,000,000 MVCAT
-- ERC20Permit for gasless approvals
-- ERC20Votes for on-chain governance
-- ERC20Burnable
-- Role-based minting via AccessControl
+The project demonstrates a complete Web3 stack: contract authoring, testing, deployment scripting, CI/CD, and frontend integration.
 
-### MVStaking
+## Tech Stack
 
-- Time-based reward distribution
-- Proportional rewards via rewardPerToken accumulator
-- ReentrancyGuard on all state-changing entry points
-- Ownable2Step for safe ownership transfer
+| Layer | Technology | Version |
+|---|---|---|
+| Smart contracts | Solidity | 0.8.30 |
+| Contract framework | Foundry | 1.5.0 |
+| Contract library | OpenZeppelin Contracts | 5.3.0 |
+| Frontend | React + TypeScript | 19 / 5.6 |
+| Bundler | Vite | 6 |
+| Web3 client | Viem + Wagmi | 2.21 / 2.14 |
+| Data fetching | TanStack Query | 5 |
+| Hosting | Cloudflare Pages | — |
 
 ## Architecture
 
-    User -> MVStaking (stake/withdraw/claim)
-                 |
-                 +-- stakingToken (MVCatCoin)
-                 +-- rewardsToken (MVCatCoin or other ERC20)
+```mermaid
+graph TD
+    User[User Wallet]
+    FE[React Frontend]
+    MC[MVCatCoin ERC20]
+    MS[MVStaking Pool]
+    Gov[On-chain Governance]
 
-    MVCatCoin -> OpenZeppelin ERC20 stack
-               + AccessControl (MINTER_ROLE)
+    User -->|Connect| FE
+    FE -->|stake / withdraw| MS
+    FE -->|read balance| MC
+    MS -->|stakingToken| MC
+    MS -->|rewardsToken| MC
+    MC -->|delegate votes| Gov
+```
+
+### Contract Details
+
+**MVCatCoin** (`contracts/MVCatCoin.sol`)
+
+- ERC20 with capped supply of 1,000,000,000 MVCAT
+- `ERC20Permit` for gasless approvals
+- `ERC20Votes` for on-chain governance
+- `ERC20Burnable` for supply reduction
+- `AccessControl` with `MINTER_ROLE` for controlled minting
+- Custom error `ZeroAddress` instead of require strings
+
+**MVStaking** (`contracts/MVStaking.sol`)
+
+- `rewardPerToken` accumulator pattern for efficient reward distribution
+- `ReentrancyGuard` on all state-changing entry points
+- `Ownable2Step` for two-step ownership transfer
+- Configurable `rewardRate` by owner
+- `recoverERC20` with protection for staking token
 
 ## Quickstart
 
-    forge install foundry-rs/forge-std
-    forge install OpenZeppelin/openzeppelin-contracts
-    forge build
-    forge test
-
-## Deploy Contracts
-
-    cp .env.example .env
-    source .env
-    forge script script/DeployMVCatCoin.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
-
-## Frontend
-
-TypeScript dApp dashboard with liquid glass UI, black-green theme, and MV logo. Built with Vite and Viem.
-
-    cd frontend
-    npm install
-    npm run dev
-
-## Deploy Frontend to Cloudflare Pages
-
-1. Push this repository to GitHub.
-2. Go to pages.cloudflare.com, click Create a project, connect the GitHub repository.
-3. Build settings:
-   - Framework preset: `Vite`
-   - Root directory: `frontend`
-   - Build command: `npm install && npm run build`
-   - Build output directory: `dist`
-4. Environment variable: `NODE_VERSION=22`
-5. Click Save and Deploy.
-
-Cloudflare provisions SSL automatically and serves via edge network with DDoS protection.
-
-Live site: https://mvcatcoin.pages.dev
+```bash
+git clone https://github.com/wowasoy/mvcatcoin.git
+cd mvcatcoin
+forge install foundry-rs/forge-std --no-git --no-commit
+forge install OpenZeppelin/openzeppelin-contracts --no-git --no-commit
+forge build
+forge test
+```
 
 ## Testing
 
-    forge test -vvv
-    forge coverage
+Run the full test suite:
+
+```bash
+forge test -vvv
+```
+
+Run coverage:
+
+```bash
+forge coverage
+```
+
+The suite includes unit tests, fuzz tests, and revert-path tests for both contracts.
+
+## Deployment
+
+### 1. Configure environment
+
+```bash
+cp .env.example .env
+# Edit .env with your admin address, treasury address, and RPC URL
+```
+
+### 2. Deploy
+
+```bash
+source .env
+forge script script/DeployMVCatCoin.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
+```
+
+### 3. Staking (optional)
+
+```bash
+forge script script/DeployMVStaking.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
+```
+
+## Frontend
+
+The `frontend/` directory contains a React dApp dashboard.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Features:
+
+- Wallet connect via wagmi (MetaMask, Rabby, OKX)
+- Token info loader with auto-fill from deployment config
+- Swap integration with Uniswap V2 (Sepolia)
+- Staking UI with stake / withdraw / claim
+- Toast notifications via sonner
+- Etherscan links on transactions
+- Liquid glass UI, black-green theme, MV logo
+
+### Deploy Frontend to Cloudflare Pages
+
+| Setting | Value |
+|---|---|
+| Framework preset | Vite |
+| Root directory | `frontend` |
+| Build command | `npm install && npm run build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION=22` |
+
+## Project Structure
+
+```
+mvcatcoin/
+├── contracts/            Solidity smart contracts
+├── script/               Foundry deployment scripts
+├── test/                 Foundry test suite
+├── frontend/             React + Vite dApp
+│   ├── src/
+│   │   ├── components/   UI components
+│   │   ├── styles/       CSS
+│   │   ├── abi.ts        Contract ABIs
+│   │   ├── contracts.ts  Deployment addresses
+│   │   ├── wagmi.ts      Wagmi config
+│   │   └── main.tsx      Entry point
+│   └── public/           Static assets, headers, robots.txt
+└── .github/workflows/    CI pipeline
+```
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the disclosure policy and scope.
+
+Best practices applied:
+
+- OpenZeppelin Contracts v5.3.0 (audited)
+- Solidity 0.8.30 with built-in overflow checks
+- `ReentrancyGuard` on state-changing entry points
+- `Ownable2Step` for safe ownership transfer
+- Custom errors instead of require strings
+- Role-based access control
+- Fuzz testing via Foundry
 
 ## Contact
 
 Telegram: [t.me/MVrocketRuns](https://t.me/MVrocketRuns)
 
-## Security
-
-See SECURITY.md.
-
 ## License
 
-MIT. See LICENSE.
+MIT. See [LICENSE](LICENSE).
