@@ -16,6 +16,8 @@ export const stakingAbi = parseAbi([
   "function claimReward()",
   "function staked(address) view returns (uint256)",
   "function earned(address) view returns (uint256)",
+  "function totalStaked() view returns (uint256)",
+  "function rewardRate() view returns (uint256)",
 ]);
 
 export const routerAbi = parseAbi([
@@ -23,4 +25,11 @@ export const routerAbi = parseAbi([
   "function swapExactETHForTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline) payable returns (uint256[] amounts)",
   "function swapExactTokensForETH(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)",
   "function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)",
+]);
+
+export const mockTokenAbi = parseAbi([
+  "function faucet()",
+  "function lastClaim(address) view returns (uint256)",
+  "function FAUCET_AMOUNT() view returns (uint256)",
+  "function FAUCET_COOLDOWN() view returns (uint256)",
 ]);
