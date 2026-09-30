@@ -9,18 +9,20 @@
 
 **Live demo:** https://mvcatcoin.pages.dev
 
-Production-grade ERC20 governance token with a companion staking pool and a TypeScript dApp dashboard. Built with Foundry, OpenZeppelin Contracts v5, and React + wagmi.
+A full-stack Web3 demo project with a production-grade ERC20 token, a staking pool, a mock token with public faucet, a multi-token swap interface on Uniswap V2, and a Chainlink price feed integration for real-time USD quotes.
 
 ---
 
 ## Overview
 
-MVCatCoin is a two-contract system:
+MVCatCoin demonstrates a complete Web3 stack across four contracts and a React dApp:
 
-- **MVCatCoin** — an ERC20 token with capped supply, permit, burnable, and on-chain voting
-- **MVStaking** — a time-based staking pool distributing rewards proportionally
+- **MVCatCoin** — the governance ERC20 (capped, permit, burnable, votes)
+- **MVStaking** — a time-based staking pool using the reward-per-token accumulator pattern
+- **MockToken** — an ERC20 with a public `faucet()` for testnet demos
+- **React dApp** — multi-token swap, staking UI, and real-time USD pricing
 
-The project demonstrates a complete Web3 stack: contract authoring, testing, deployment scripting, CI/CD, and frontend integration.
+The project is currently deployed on **Sepolia testnet** and serves as a portfolio piece demonstrating contract authoring, testing, frontend integration, and DeFi primitives.
 
 ## Tech Stack
 
@@ -29,10 +31,12 @@ The project demonstrates a complete Web3 stack: contract authoring, testing, dep
 | Smart contracts | Solidity | 0.8.30 |
 | Contract framework | Foundry | 1.5.0 |
 | Contract library | OpenZeppelin Contracts | 5.3.0 |
+| Oracle | Chainlink Price Feeds | — |
 | Frontend | React + TypeScript | 19 / 5.6 |
 | Bundler | Vite | 6 |
 | Web3 client | Viem + Wagmi | 2.21 / 2.14 |
 | Data fetching | TanStack Query | 5 |
+| Notifications | Sonner | 1.7 |
 | Hosting | Cloudflare Pages | — |
 
 ## Architecture
@@ -40,37 +44,62 @@ The project demonstrates a complete Web3 stack: contract authoring, testing, dep
 ```mermaid
 graph TD
     User[User Wallet]
-    FE[React Frontend]
+    FE[React dApp]
+    Swap[Uniswap V2 Router]
     MC[MVCatCoin ERC20]
     MS[MVStaking Pool]
-    Gov[On-chain Governance]
+    MT[MockToken + Faucet]
+    CL[Chainlink Price Feed]
 
     User -->|Connect| FE
-    FE -->|stake / withdraw| MS
-    FE -->|read balance| MC
-    MS -->|stakingToken| MC
-    MS -->|rewardsToken| MC
-    MC -->|delegate votes| Gov
+    FE -->|multi-token swap| Swap
+    FE -->|stake / withdraw / claim| MS
+    FE -->|read USD price| CL
+    MS -->|stakingToken| MT
+    MS -->|rewardsToken| MT
+    Swap -->|WETH / USDC / LINK / DAI| User
+    MC -.->|governance| User
 ```
 
 ### Contract Details
 
-**MVCatCoin** (`contracts/MVCatCoin.sol`)
+**MVCatCoin** — `contracts/MVCatCoin.sol`
 
 - ERC20 with capped supply of 1,000,000,000 MVCAT
 - `ERC20Permit` for gasless approvals
 - `ERC20Votes` for on-chain governance
-- `ERC20Burnable` for supply reduction
-- `AccessControl` with `MINTER_ROLE` for controlled minting
-- Custom error `ZeroAddress` instead of require strings
+- `ERC20Burnable`
+- `AccessControl` with `MINTER_ROLE`
+- Custom error `ZeroAddress`
 
-**MVStaking** (`contracts/MVStaking.sol`)
+**MVStaking** — `contracts/MVStaking.sol`
 
-- `rewardPerToken` accumulator pattern for efficient reward distribution
-- `ReentrancyGuard` on all state-changing entry points
-- `Ownable2Step` for two-step ownership transfer
+- `rewardPerToken` accumulator pattern
+- `ReentrancyGuard` on state-changing entry points
+- `Ownable2Step` for ownership transfer
 - Configurable `rewardRate` by owner
-- `recoverERC20` with protection for staking token
+- `recoverERC20` with staking-token protection
+
+**MockToken** — `contracts/MockToken.sol`
+
+- Test ERC20 with public `faucet()`
+- 1,000 tokens per claim, 24-hour cooldown
+- Custom error `FaucetCooldown(uint256 secondsRemaining)`
+
+## Frontend Features
+
+- **Multi-token swap** — ETH, WETH, USDC, LINK, DAI, USDT on Sepolia via Uniswap V2
+- **Custom SVG token icons** — brand-accurate logos rendered inline
+- **Real-time USD pricing** — Chainlink ETH/USD price feed, refreshed every 30s
+- **Token picker modal** — bottom-sheet UI with search-ready layout
+- **Live quote** — auto-fetched from the Uniswap router as you type
+- **MAX button** — auto-fills balance, reserves gas for native ETH
+- **Approval flow** — detects allowance and prompts approve before swap
+- **Staking UI** — stake / withdraw / claim with live stats (balance, staked, earned)
+- **Faucet button** — claims mock tokens for demo
+- **Etherscan links** — every transaction is linkable
+- **Toast notifications** — success, error, and info states via Sonner
+- **Liquid glass UI** — black-green theme, animated orbs, mobile-first responsive
 
 ## Quickstart
 
@@ -85,19 +114,12 @@ forge test
 
 ## Testing
 
-Run the full test suite:
-
 ```bash
 forge test -vvv
-```
-
-Run coverage:
-
-```bash
 forge coverage
 ```
 
-The suite includes unit tests, fuzz tests, and revert-path tests for both contracts.
+The suite includes unit tests, fuzz tests, and revert-path tests for both `MVCatCoin` and `MVStaking`.
 
 ## Deployment
 
@@ -105,25 +127,26 @@ The suite includes unit tests, fuzz tests, and revert-path tests for both contra
 
 ```bash
 cp .env.example .env
-# Edit .env with your admin address, treasury address, and RPC URL
+# Edit .env: ADMIN_ADDRESS, TREASURY_ADDRESS, INITIAL_SUPPLY, SEPOLIA_RPC_URL, PRIVATE_KEY
 ```
 
-### 2. Deploy
+### 2. Deploy token + staking stack
 
 ```bash
 source .env
+
+# Option A: real MVCatCoin (production path)
 forge script script/DeployMVCatCoin.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
+
+# Option B: mock token + staking (testnet demo path)
+forge script script/DeployMockStack.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast
 ```
 
-### 3. Staking (optional)
+### 3. Update frontend addresses
 
-```bash
-forge script script/DeployMVStaking.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast --verify
-```
+Copy contract addresses into `frontend/src/contracts.ts` under `DEPLOYMENTS[sepolia.id]`.
 
 ## Frontend
-
-The `frontend/` directory contains a React dApp dashboard.
 
 ```bash
 cd frontend
@@ -131,17 +154,7 @@ npm install
 npm run dev
 ```
 
-Features:
-
-- Wallet connect via wagmi (MetaMask, Rabby, OKX)
-- Token info loader with auto-fill from deployment config
-- Swap integration with Uniswap V2 (Sepolia)
-- Staking UI with stake / withdraw / claim
-- Toast notifications via sonner
-- Etherscan links on transactions
-- Liquid glass UI, black-green theme, MV logo
-
-### Deploy Frontend to Cloudflare Pages
+### Deploy to Cloudflare Pages
 
 | Setting | Value |
 |---|---|
@@ -155,19 +168,40 @@ Features:
 
 ```
 mvcatcoin/
-├── contracts/            Solidity smart contracts
-├── script/               Foundry deployment scripts
-├── test/                 Foundry test suite
-├── frontend/             React + Vite dApp
+├── contracts/
+│   ├── MVCatCoin.sol          ERC20 governance token
+│   ├── MVStaking.sol          Reward pool
+│   └── MockToken.sol          Test ERC20 with faucet
+├── script/
+│   ├── DeployMVCatCoin.s.sol
+│   ├── DeployMVStaking.s.sol
+│   └── DeployMockStack.s.sol  Deploy mock + staking in one go
+├── test/
+│   ├── MVCatCoin.t.sol
+│   └── MVStaking.t.sol
+├── frontend/
 │   ├── src/
-│   │   ├── components/   UI components
-│   │   ├── styles/       CSS
-│   │   ├── abi.ts        Contract ABIs
-│   │   ├── contracts.ts  Deployment addresses
-│   │   ├── wagmi.ts      Wagmi config
-│   │   └── main.tsx      Entry point
-│   └── public/           Static assets, headers, robots.txt
-└── .github/workflows/    CI pipeline
+│   │   ├── components/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Logo.tsx
+│   │   │   ├── WalletCard.tsx
+│   │   │   ├── TokenInfoCard.tsx
+│   │   │   ├── SwapCard.tsx
+│   │   │   ├── StakingCard.tsx
+│   │   │   ├── TokenIcons.tsx      Inline SVG icons
+│   │   │   └── PriceDisplay.tsx    Chainlink USD wrapper
+│   │   ├── hooks/
+│   │   │   └── usePrice.ts         Chainlink price hook
+│   │   ├── styles/
+│   │   │   └── main.css
+│   │   ├── abi.ts
+│   │   ├── chainlink.ts            Feed addresses + ABI
+│   │   ├── contracts.ts            Deployment registry
+│   │   ├── tokens.ts               Sepolia token list
+│   │   ├── wagmi.ts
+│   │   └── main.tsx
+│   └── public/
+└── .github/workflows/ci.yml
 ```
 
 ## Security
@@ -183,6 +217,11 @@ Best practices applied:
 - Custom errors instead of require strings
 - Role-based access control
 - Fuzz testing via Foundry
+- Chainlink oracle for price accuracy
+
+## Notes on Testnet Demo
+
+The Sepolia demo uses **mock tokens** with a public faucet. USD prices come from **Chainlink Sepolia feeds** which track mainnet markets — not from the thin Sepolia Uniswap pools. This is the recommended setup for accurate demo pricing.
 
 ## Contact
 
