@@ -285,3 +285,211 @@ footer p {
 @media (prefers-reduced-motion: reduce) {
   .orb, .logo, .glass::after { animation: none; }
 }
+/* ---- Swap UI ---- */
+.swap-box {
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.swap-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.swap-row + .swap-row {
+  margin-top: 0.5rem;
+}
+
+.swap-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.token-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.5rem;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.token-picker:hover {
+  background: rgba(0, 255, 136, 0.16);
+}
+
+.input-row {
+  align-items: center;
+}
+
+.swap-input,
+.swap-output {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1.3rem;
+  padding: 0.25rem 0;
+  margin: 0;
+  width: auto;
+}
+
+.swap-input::placeholder {
+  color: rgba(127, 216, 168, 0.35);
+}
+
+.swap-output {
+  color: var(--muted);
+  text-align: right;
+}
+
+.max-btn {
+  padding: 0.3rem 0.6rem;
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--accent);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.info-row {
+  font-size: 0.72rem;
+  color: var(--muted);
+  justify-content: flex-start;
+}
+
+.swap-flip {
+  display: flex;
+  justify-content: center;
+  margin: -0.35rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+.swap-flip button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff88, #00d97a);
+  color: #001a0f;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 255, 136, 0.35);
+  padding: 0;
+}
+
+.swap-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+/* ---- Token picker modal ---- */
+.token-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: 0;
+}
+
+.token-modal-content {
+  background: #05160c;
+  border-top: 1px solid var(--glass-border);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1rem 1rem 1.5rem;
+}
+
+.token-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.25rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.token-modal-header h3 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.token-modal-header button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 0.5rem;
+}
+
+.token-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.token-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.token-item:hover {
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.token-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.token-item-symbol {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.token-item-name {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
