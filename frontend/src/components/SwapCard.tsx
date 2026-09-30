@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { formatUnits, parseUnits, type Address } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import {
   useAccount,
   useBalance,
@@ -10,11 +10,9 @@ import {
 import { toast } from "sonner";
 import { erc20Abi, routerAbi } from "../abi";
 import {
-  ETH_SENTINEL,
   NATIVE_ETH,
   ROUTER_SEPOLIA,
   SEPOLIA_TOKENS,
-  WETH_SEPOLIA,
   buildPath,
   type Token,
 } from "../tokens";
