@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001a0f"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="catGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8ff1a"/>
+      <stop offset="100%" stop-color="#7fff00"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <circle cx="150" cy="80" r="180" fill="#00ff88" opacity="0.15"/>
+  <circle cx="1050" cy="550" r="200" fill="#00d97a" opacity="0.1"/>
+
+  <rect x="100" y="180" width="180" height="180" rx="40" fill="url(#catGrad)"/>
+  <text x="190" y="295" font-family="Helvetica, Arial, sans-serif" font-size="90" font-weight="300" text-anchor="middle" fill="#6e6e6e">MV</text>
+
+  <text x="330" y="255" font-family="monospace" font-size="64" font-weight="700" fill="#e6fff2">MVCatCoin</text>
+  <text x="330" y="305" font-family="monospace" font-size="26" fill="#7fd8a8">Friendly ERC-20 on Sepolia</text>
+
+  <text x="100" y="450" font-family="monospace" font-size="24" fill="#00ff88">Swap UI  ·  Staking  ·  Chainlink</text>
+
+  <text x="100" y="555" font-family="monospace" font-size="22" fill="#7fd8a8">mvcatcoin.pages.dev</text>
+</svg>

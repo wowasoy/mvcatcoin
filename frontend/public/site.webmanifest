@@ -1,0 +1,17 @@
+{
+  "name": "MVCatCoin",
+  "short_name": "MVCatCoin",
+  "description": "Friendly ERC-20 token with swap UI, staking, and Chainlink price feeds.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#001a0f",
+  "theme_color": "#001a0f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
