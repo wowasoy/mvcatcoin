@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { Toaster } from "sonner";
@@ -7,6 +8,8 @@ import WalletCard from "./components/WalletCard";
 import TokenInfoCard from "./components/TokenInfoCard";
 import SwapCard from "./components/SwapCard";
 import StakingCard from "./components/StakingCard";
+import Sidebar from "./components/Sidebar";
+import MenuButton from "./components/MenuButton";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +21,8 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
@@ -26,6 +31,9 @@ export default function App() {
           <span className="orb orb-2" />
           <span className="orb orb-3" />
         </div>
+
+        <MenuButton onClick={() => setMenuOpen(true)} />
+        <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
         <main>
           <Header />
