@@ -25,7 +25,8 @@ html {
   text-size-adjust: 100%;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -45,8 +46,6 @@ body {
     radial-gradient(circle at 80% 90%, #001f12 0%, transparent 50%),
     linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 60%, #000a05 100%);
   background-attachment: fixed;
-  display: flex;
-  justify-content: center;
   padding: clamp(0.75rem, 3vw, 2rem) clamp(0.6rem, 2.5vw, 1rem)
     clamp(1.5rem, 4vw, 3rem);
 }
@@ -68,22 +67,50 @@ body {
   animation: float 18s ease-in-out infinite;
 }
 
-.orb-1 { width: 340px; height: 340px; background: #00ff88; top: -80px; left: -80px; }
-.orb-2 { width: 280px; height: 280px; background: #00d97a; bottom: -60px; right: -60px; animation-delay: -6s; }
-.orb-3 { width: 220px; height: 220px; background: #00a854; top: 45%; left: 60%; animation-delay: -12s; }
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, -20px) scale(1.08); }
+.orb-1 {
+  width: 340px;
+  height: 340px;
+  background: #00ff88;
+  top: -80px;
+  left: -80px;
 }
 
-/* ---- Layout ---- */
+.orb-2 {
+  width: 280px;
+  height: 280px;
+  background: #00d97a;
+  bottom: -60px;
+  right: -60px;
+  animation-delay: -6s;
+}
+
+.orb-3 {
+  width: 220px;
+  height: 220px;
+  background: #00a854;
+  top: 45%;
+  left: 60%;
+  animation-delay: -12s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -20px) scale(1.08);
+  }
+}
+
+/* ---- Layout (block + margin auto for webview compatibility) ---- */
 main {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 520px;
   min-width: 0;
+  margin: 0 auto;
 }
 
 /* ---- Glassmorphism ---- */
@@ -131,8 +158,12 @@ main {
 }
 
 @keyframes sheen {
-  0% { left: -60%; }
-  100% { left: 130%; }
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 130%;
+  }
 }
 
 /* ---- Hero ---- */
@@ -152,8 +183,15 @@ main {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 24px rgba(0, 255, 136, 0.55)); }
-  50% { transform: scale(1.04); filter: drop-shadow(0 0 36px rgba(0, 255, 136, 0.85)); }
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 24px rgba(0, 255, 136, 0.55));
+  }
+  50% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 36px rgba(0, 255, 136, 0.85));
+  }
 }
 
 h1 {
@@ -365,10 +403,16 @@ button:disabled {
   border-bottom-style: solid;
 }
 
-.token-info p { margin: 0.3rem 0; }
-.token-info p span { color: var(--accent); }
+.token-info p {
+  margin: 0.3rem 0;
+}
+.token-info p span {
+  color: var(--accent);
+}
 
-.account { margin-top: 0.75rem; }
+.account {
+  margin-top: 0.75rem;
+}
 
 /* ---- Swap UI ---- */
 .swap-box {
@@ -599,6 +643,71 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* ---- Chainlink price display ---- */
+.price-display {
+  font-size: clamp(0.68rem, 2.4vw, 0.78rem);
+  color: var(--muted);
+  margin: 0.4rem 0 0;
+  text-align: right;
+  position: relative;
+  z-index: 1;
+  word-break: break-word;
+}
+
+.price-source {
+  font-size: clamp(0.58rem, 2vw, 0.68rem);
+  color: rgba(127, 216, 168, 0.6);
+  margin-left: 0.25rem;
+  white-space: nowrap;
+}
+
+/* ---- Staking stats ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-item {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: clamp(0.58rem, 2vw, 0.68rem);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-value {
+  font-size: clamp(0.82rem, 3vw, 0.95rem);
+  font-weight: 600;
+  color: var(--text);
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.stat-value.accent {
+  color: var(--accent);
+}
+
+.faucet-btn {
+  width: 100%;
+}
+
 /* ---- Footer ---- */
 footer {
   padding: 1rem 1.25rem;
@@ -647,67 +756,4 @@ footer p {
   .glass::after {
     animation: none;
   }
-}
-/* ---- Chainlink price display ---- */
-.price-display {
-  font-size: clamp(0.68rem, 2.4vw, 0.78rem);
-  color: var(--muted);
-  margin: 0.4rem 0 0;
-  text-align: right;
-  position: relative;
-  z-index: 1;
-  word-break: break-word;
-}
-
-.price-source {
-  font-size: clamp(0.58rem, 2vw, 0.68rem);
-  color: rgba(127, 216, 168, 0.6);
-  margin-left: 0.25rem;
-  white-space: nowrap;
-}
-/* ---- Staking stats ---- */
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 0.9rem;
-  position: relative;
-  z-index: 1;
-}
-
-.stat-item {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 0.55rem 0.65rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.stat-label {
-  font-size: clamp(0.58rem, 2vw, 0.68rem);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stat-value {
-  font-size: clamp(0.82rem, 3vw, 0.95rem);
-  font-weight: 600;
-  color: var(--text);
-  word-break: break-all;
-  overflow-wrap: anywhere;
-}
-
-.stat-value.accent {
-  color: var(--accent);
-}
-
-.faucet-btn {
-  width: 100%;
 }
