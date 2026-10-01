@@ -4,6 +4,7 @@ import {
   useAccount,
   useBalance,
   useReadContract,
+  useSwitchChain,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -17,24 +18,40 @@ import {
   type Token,
 } from "../tokens";
 import { TokenIcon } from "./TokenIcons";
+import PriceDisplay from "./PriceDisplay";
+
+const SEPOLIA_CHAIN_ID = 11155111;
+
+/**
+ * Symbol used for Chainlink price lookup.
+ * WETH shares the ETH feed since WETH is 1:1 with ETH.
+ */
+function priceSymbolFor(token: Token): string {
+  return token.symbol === "WETH" ? "ETH" : token.symbol;
+}
 
 export default function SwapCard() {
   const { address: account, chain } = useAccount();
+  const { switchChain } = useSwitchChain();
   const [fromToken, setFromToken] = useState<Token>(NATIVE_ETH);
   const [toToken, setToToken] = useState<Token>(SEPOLIA_TOKENS[2]);
   const [amount, setAmount] = useState("");
   const [picker, setPicker] = useState<"from" | "to" | null>(null);
 
-  const onSepolia = chain?.id === 11155111;
+  const onSepolia = chain?.id === SEPOLIA_CHAIN_ID;
+  const canFetch = !!account && onSepolia;
 
-  const { data: ethBalance } = useBalance({ address: account, query: { enabled: onSepolia && !!account } });
+  const { data: ethBalance } = useBalance({
+    address: account,
+    query: { enabled: canFetch },
+  });
 
   const { data: fromBalance } = useReadContract({
     address: fromToken.isNative ? undefined : fromToken.address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: account ? [account] : undefined,
-    query: { enabled: !!account && !fromToken.isNative && onSepolia },
+    query: { enabled: canFetch && !fromToken.isNative },
   });
 
   const amountIn = useMemo(() => {
@@ -53,7 +70,7 @@ export default function SwapCard() {
     abi: routerAbi,
     functionName: "getAmountsOut",
     args: amountIn > 0n ? [amountIn, path] : undefined,
-    query: { enabled: amountIn > 0n && onSepolia },
+    query: { enabled: canFetch && amountIn > 0n },
   });
 
   const expectedOut = quote && quote.length > 0 ? quote[quote.length - 1] : undefined;
@@ -77,7 +94,7 @@ export default function SwapCard() {
     abi: erc20Abi,
     functionName: "allowance",
     args: account ? [account, ROUTER_SEPOLIA] : undefined,
-    query: { enabled: !!account && !fromToken.isNative && onSepolia },
+    query: { enabled: canFetch && !fromToken.isNative },
   });
 
   const needsApproval =
@@ -88,7 +105,7 @@ export default function SwapCard() {
     : fromBalance ?? 0n;
 
   const handleMax = () => {
-    if (availableBalance === 0n) return;
+    if (!account || availableBalance === 0n) return;
     const adjusted =
       fromToken.isNative && availableBalance > 10n ** 15n
         ? availableBalance - 10n ** 15n
@@ -97,12 +114,26 @@ export default function SwapCard() {
   };
 
   const handleSwap = () => {
-    if (!account) return toast.error("Connect wallet first");
-    if (!onSepolia) return toast.error("Switch to Sepolia network");
-    if (fromToken.symbol === toToken.symbol)
-      return toast.error("Select different tokens");
-    if (amountIn === 0n) return toast.error("Enter an amount");
-    if (amountIn > availableBalance) return toast.error("Insufficient balance");
+    if (!account) {
+      toast.info("Connect your wallet to start swapping");
+      return;
+    }
+    if (!onSepolia) {
+      switchChain?.({ chainId: SEPOLIA_CHAIN_ID });
+      return;
+    }
+    if (fromToken.symbol === toToken.symbol) {
+      toast.error("Pick two different tokens");
+      return;
+    }
+    if (amountIn === 0n) {
+      toast.error("Enter an amount first");
+      return;
+    }
+    if (amountIn > availableBalance) {
+      toast.error(`Insufficient ${fromToken.symbol} balance`);
+      return;
+    }
 
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
     const minOut = expectedOut ? (expectedOut * 97n) / 100n : 0n;
@@ -114,7 +145,7 @@ export default function SwapCard() {
         functionName: "approve",
         args: [ROUTER_SEPOLIA, amountIn],
       });
-      toast.info("Approve submitted. Confirm in wallet, then swap again.");
+      toast.info("Approve submitted. Confirm then swap again.");
       return;
     }
 
@@ -155,18 +186,28 @@ export default function SwapCard() {
 
   const busy = isPending || confirming;
 
-  if (!onSepolia) {
-    return (
-      <section className="card glass">
-        <h2>Swap</h2>
-        <p className="mono">Connect to Sepolia network to swap testnet tokens.</p>
-      </section>
-    );
-  }
+  const buttonLabel = (() => {
+    if (!account) return "Connect Wallet";
+    if (!onSepolia) return "Switch to Sepolia";
+    if (busy) return "Swapping...";
+    if (needsApproval) return `Approve ${fromToken.symbol}`;
+    if (amountIn === 0n) return "Enter an amount";
+    return `Swap ${fromToken.symbol} for ${toToken.symbol}`;
+  })();
+
+  const buttonDisabled = busy || (!!account && onSepolia && amountIn === 0n);
+  const balanceDisplay = !account
+    ? "—"
+    : formatUnits(availableBalance, fromToken.decimals).slice(0, 10);
 
   return (
     <section className="card glass">
-      <h2>Swap</h2>
+      <div className="card-header">
+        <h2>Swap</h2>
+        <span className={`card-tag ${onSepolia ? "live" : ""}`}>
+          {onSepolia ? "Sepolia" : "Uniswap V2"}
+        </span>
+      </div>
 
       <div className="swap-box">
         <div className="swap-row">
@@ -196,10 +237,7 @@ export default function SwapCard() {
         </div>
 
         <div className="swap-row info-row">
-          <span>
-            Balance:{" "}
-            {formatUnits(availableBalance, fromToken.decimals).slice(0, 10)}
-          </span>
+          <span>Balance: {balanceDisplay}</span>
         </div>
       </div>
 
@@ -231,19 +269,22 @@ export default function SwapCard() {
               : "0.0"}
           </div>
         </div>
+
+        {/* Chainlink USD reference for the output token */}
+        <PriceDisplay
+          amount={expectedOut}
+          decimals={toToken.decimals}
+          priceSymbol={priceSymbolFor(toToken)}
+        />
       </div>
 
       <button
         className="btn-primary swap-btn"
         onClick={handleSwap}
-        disabled={busy || amountIn === 0n}
+        disabled={buttonDisabled}
         type="button"
       >
-        {busy
-          ? "Pending..."
-          : needsApproval
-          ? `Approve ${fromToken.symbol}`
-          : `Swap ${fromToken.symbol} for ${toToken.symbol}`}
+        {buttonLabel}
       </button>
 
       {hash && (
