@@ -10,6 +10,7 @@ import SwapCard from "./components/SwapCard";
 import StakingCard from "./components/StakingCard";
 import Sidebar from "./components/Sidebar";
 import MenuButton from "./components/MenuButton";
+import MarketTicker from "./components/MarketTicker";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ export default function App() {
         <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
 
         <main>
+          <MarketTicker />
           <Header />
           <WalletCard />
           <TokenInfoCard />
