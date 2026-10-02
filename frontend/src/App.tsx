@@ -6,6 +6,7 @@ import { config } from "./wagmi";
 import Header from "./components/Header";
 import WalletCard from "./components/WalletCard";
 import TokenInfoCard from "./components/TokenInfoCard";
+import TokenSecurityCard from "./components/TokenSecurityCard";
 import SwapCard from "./components/SwapCard";
 import StakingCard from "./components/StakingCard";
 import Sidebar from "./components/Sidebar";
@@ -41,6 +42,7 @@ export default function App() {
           <Header />
           <WalletCard />
           <TokenInfoCard />
+          <TokenSecurityCard />
           <SwapCard />
           <StakingCard />
           <footer className="glass">
