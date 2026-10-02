@@ -109,11 +109,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
             <div className="sidebar-links">
               <a
-                href="https://github.com/wowasoy/mvcatcoin"
+                href="https://mvwallet.pages.dev"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                GitHub repository
+                MV Wallet
               </a>
               <a
                 href="https://mvcatcoin.pages.dev"
