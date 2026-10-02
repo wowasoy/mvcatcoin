@@ -1209,3 +1209,24 @@ footer p {
   text-align: center;
   line-height: 1.4;
 }
+.security-presets {
+  margin-bottom: 0.5rem;
+}
+
+.security-presets > button {
+  flex: 1 1 0;
+  font-size: 0.7rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.security-chain {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.security-chain strong {
+  color: var(--accent);
+}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { isAddress } from "viem";
 import { toast } from "sonner";
-import { useTokenSecurity } from "../hooks/useTokenSecurity";
+import { useTokenSecurity, chainName } from "../hooks/useTokenSecurity";
 
 function riskLabel(score: number): string {
   if (score >= 60) return "High Risk";
@@ -17,16 +17,33 @@ function riskColor(score: number): string {
   return "safe";
 }
 
+const PRESETS = [
+  {
+    label: "USDC",
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  },
+  {
+    label: "PEPE",
+    address: "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+  },
+  {
+    label: "LINK",
+    address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+  },
+];
+
 export default function TokenSecurityCard() {
   const [address, setAddress] = useState("");
   const { result, loading, error, check, reset } = useTokenSecurity();
 
-  const handleCheck = () => {
-    if (!isAddress(address)) {
+  const handleCheck = (addr?: string) => {
+    const target = addr ?? address;
+    if (!isAddress(target)) {
       toast.error("Enter a valid contract address");
       return;
     }
-    check(address);
+    setAddress(target);
+    check(target);
   };
 
   return (
@@ -38,7 +55,7 @@ export default function TokenSecurityCard() {
 
       <p className="card-subtitle">
         Scan any ERC-20 contract for honeypot behavior, taxes, and ownership
-        risks before interacting.
+        risks before interacting. Multi-chain: Ethereum, Base, BSC, Polygon.
       </p>
 
       <label htmlFor="securityAddress">Contract Address</label>
@@ -55,9 +72,23 @@ export default function TokenSecurityCard() {
         }}
       />
 
+      <div className="row security-presets">
+        {PRESETS.map((p) => (
+          <button
+            key={p.label}
+            className="btn-ghost"
+            type="button"
+            onClick={() => handleCheck(p.address)}
+            disabled={loading}
+          >
+            Try {p.label}
+          </button>
+        ))}
+      </div>
+
       <button
         className="btn-primary"
-        onClick={handleCheck}
+        onClick={() => handleCheck()}
         disabled={loading || address.length === 0}
         type="button"
       >
@@ -71,6 +102,10 @@ export default function TokenSecurityCard() {
           <div className={`security-badge ${riskColor(result.riskScore)}`}>
             {riskLabel(result.riskScore)} · {result.riskScore}/100
           </div>
+
+          <p className="security-chain">
+            Chain detected: <strong>{chainName(result.chainId)}</strong>
+          </p>
 
           <div className="stat-grid">
             <div className="stat-item">

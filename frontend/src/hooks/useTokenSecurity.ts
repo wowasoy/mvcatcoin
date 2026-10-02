@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 export interface TokenSecurityResult {
+  chainId: number;
   isHoneypot: boolean;
   buyTax: number;
   sellTax: number;
@@ -16,9 +17,23 @@ export interface TokenSecurityResult {
 }
 
 interface GoPlusResponse {
-  code: number;
-  message: string;
+  chainId: number;
   result: Record<string, Record<string, unknown>>;
+  error?: string;
+}
+
+const CHAIN_NAMES: Record<number, string> = {
+  1: "Ethereum",
+  8453: "Base",
+  56: "BSC",
+  137: "Polygon",
+  42161: "Arbitrum",
+  10: "Optimism",
+  11155111: "Sepolia",
+};
+
+export function chainName(id: number): string {
+  return CHAIN_NAMES[id] ?? `Chain ${id}`;
 }
 
 function safeNumber(val: unknown): number {
@@ -49,7 +64,7 @@ export function useTokenSecurity() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const check = useCallback(async (address: string, chainId = 11155111) => {
+  const check = useCallback(async (address: string, chainId?: number) => {
     if (!address || address.length !== 42) {
       setError("Invalid contract address");
       setResult(null);
@@ -61,15 +76,21 @@ export function useTokenSecurity() {
     setResult(null);
 
     try {
-      const res = await fetch(
-        `/api/check-token?chainId=${chainId}&address=${address}`
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const params = new URLSearchParams({ address });
+      if (chainId) params.set("chainId", String(chainId));
 
+      const res = await fetch(`/api/check-token?${params.toString()}`);
       const json = (await res.json()) as GoPlusResponse;
+
+      if (!res.ok) {
+        if (json.error === "no_data") {
+          throw new Error("Token not indexed yet by GoPlus");
+        }
+        throw new Error(json.error ?? `HTTP ${res.status}`);
+      }
+
       const key = address.toLowerCase();
       const raw = json.result?.[key] ?? json.result?.[address];
-
       if (!raw || Object.keys(raw).length === 0) {
         throw new Error("No data returned for this address");
       }
@@ -77,6 +98,7 @@ export function useTokenSecurity() {
       const entry = raw as Record<string, unknown>;
 
       setResult({
+        chainId: json.chainId,
         isHoneypot: safeBool(entry.is_honeypot),
         buyTax: safeNumber(entry.buy_tax) * 100,
         sellTax: safeNumber(entry.sell_tax) * 100,
