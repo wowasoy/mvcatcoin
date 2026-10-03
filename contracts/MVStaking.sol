@@ -76,15 +76,14 @@ contract MVStaking is Ownable2Step, ReentrancyGuard {
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
-
-    function claimReward() public nonReentrant updateReward(msg.sender) {
-        uint256 reward = rewards[msg.sender];
-        if (reward > 0) {
-            rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
-        }
+function claimReward() public nonReentrant updateReward(msg.sender) {
+    uint256 reward = rewards[msg.sender];
+    if (reward > 0) {
+        rewards[msg.sender] = 0;
+        emit RewardPaid(msg.sender, reward);
+        rewardsToken.safeTransfer(msg.sender, reward);
     }
+}
 
     function exit() external {
         uint256 amount = staked[msg.sender];

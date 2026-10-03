@@ -1,0 +1,6 @@
+# Security-sensitive paths require explicit review
+/contracts/            @wowasoy
+/script/               @wowasoy
+/SECURITY.md           @wowasoy
+/.github/              @wowasoy
+/frontend/functions/   @wowasoy

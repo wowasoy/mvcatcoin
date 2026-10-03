@@ -1,0 +1,5 @@
+Contact: https://t.me/MVrocketRuns
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://mvcatcoin.pages.dev/.well-known/security.txt
+Policy: https://github.com/wowasoy/mvcatcoin/blob/main/SECURITY.md
